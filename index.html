@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>!! Narendra-Code-Server !!</title>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container-fluid outer">
+      <div class="row">
+        <div class="col-sm-12">
+            <h1 class="my-3"> Crud Controller Code </h1>
+        </div>
+      </div> 
+      <div class="row">
+        <div class="col-sm-12 text-light p-3">
+           <xmp>
+using Narendra_AKS_machineTest.Models;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace Narendra_AKS_machineTest.Controllers
+{
+    public class HomeController : Controller
+    {
+        // GET: Home
+        DBManeger db=new DBManeger();
+        public ActionResult Index()
+        {
+            return View();
+        }
+        void my()
+        {
+            if (Session["mysession"] == null)
+            {
+                {
+                    Response.Write("<script>alert('You have to login first...')</script>");
+                    Response.Redirect("/home/index/");
+                }
+            }
+        }
+        [HttpPost]
+        public ActionResult Index(string email,string password)
+        {
+            SqlParameter[] parameter = new SqlParameter[]
+            {
+                new SqlParameter("@email", email),
+                new SqlParameter("@passwd", password),
+                new SqlParameter("@action",1)
+            };
+            DataTable dt=db.ExecuteSelect("sp_admin",parameter);
+            if (dt.Rows.Count > 0)
+            {
+                Session["mysession"] = dt.Rows[0][0];
+                return Content("<script>alert('Login Succesfully ');window.location.href='/home/Dashboard/'</script>");
+            }
+            else
+            {
+                return Content("<script>alert('some error');window.location.href='/home/index/'</script>");
+
+            }
+        }
+        public ActionResult Dashboard()
+        {
+            my();
+            return View();
+        }
+        public ActionResult addcategory()
+        {
+            my();
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+            new SqlParameter("@action",2)
+            };
+            DataTable dt = db.ExecuteSelect("sp_category", parameters);
+            ViewBag.category = dt;  
+            return View();
+        }
+        [HttpPost]
+        public ActionResult addcategory(string cat,string st)
+        {
+            my();
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+            new SqlParameter("@catename",cat),
+            new SqlParameter("@st",st),
+            new SqlParameter("@action",1)
+            };
+            int x = db.ExecuteInsertUpdateDelete("sp_category", parameters);
+            if (x > 0)
+            {
+                return Content("<script>alert('Category is Added !');window.location.href='/home/addcategory/'</script>");
+            }
+            else
+            {
+                return Content("<script>alert('Category is not Added !');window.location.href='/home/addcategory/'</script>");
+
+            }
+        }
+        public ActionResult deletcate(int? id)
+        {
+            my();
+            SqlParameter[] parameter = new SqlParameter[]
+            {
+             new SqlParameter("@sr",id),
+            new SqlParameter("@action",3)
+            };
+            int x = db.ExecuteInsertUpdateDelete("sp_category", parameter);
+            if (x > 0)
+            {
+                return Content("<script>alert('Your Item is Deleted');window.location.href='/home/addcategory'</script>");
+            }
+            else
+            {
+                return Content("<script>alert('Your Item is not Deleted');window.location.href='/home/addcategory'</script>");
+
+            }
+
+        }
+        public ActionResult editcate(int? id)
+        {
+            my();
+            SqlParameter[] parameters = new SqlParameter[]
+            {
+            new SqlParameter("@sr",id),
+            new SqlParameter("@action",5)
+            };
+            DataTable dt = db.ExecuteSelect("sp_category", parameters);
+            ViewBag.category = dt;
+            return View();
+        }
+        [HttpPost]
+        public ActionResult editcate(int? id ,string cat,string st)
+        {
+
+            SqlParameter[] parameters = new SqlParameter[]
+           {
+            new SqlParameter("@sr",id),
+            new SqlParameter("@catename",cat),
+            new SqlParameter("@st",st),
+            new SqlParameter("@action",4)
+           };
+            int x = db.ExecuteInsertUpdateDelete("sp_category", parameters);
+            if (x > 0)
+            {
+                return Content("<script>alert('Category is updated !');window.location.href='/home/addcategory/'</script>");
+            }
+            else
+            {
+                return Content("<script>alert('Category is not updated !');window.location.href='/home/addcategory/'</script>");
+
+            }
+        }
+        public ActionResult subcategory()
+        {
+            my();
+            return View();
+        }
+        public ActionResult product()
+        {
+            my();
+            return View();
+        }
+        public ActionResult changepassword()
+        {
+            my();
+            return View();
+        }
+        [HttpPost]
+        public ActionResult changepassword(string currentpassword,string newpasswd,string confirmpasswd)
+        {
+            if(newpasswd.Equals(confirmpasswd)){
+                SqlParameter[] parameters = new SqlParameter[]
+                {
+                new SqlParameter("@passwd",currentpassword),
+                new SqlParameter("@npasswd",newpasswd),
+                new SqlParameter("@action",2)
+                };
+                int x = db.ExecuteInsertUpdateDelete("sp_admin", parameters);
+                if (x > 0)
+                {
+
+                    return Content("<script>alert('Your Password has been Updated !');window.location.href='/home/changepassword/'</script>");
+
+                }
+                else
+                {
+                    return Content("<script>alert(' Password is not updated !');window.location.href='/home/changepassword/'</script>");
+
+                }
+            }
+            else
+            {
+                return Content("<script>alert('New Password and Confirm Password is Matched ');window.location.href='/home/changepassword/'</script>");
+            }
+      
+        }
+        public ActionResult logout(string logout)
+        {
+            Session.Clear();
+            return Content("<script>alert('You are Logout');window.location.href='/home/index/'</script>");
+        }
+    }
+}
+           </xmp>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+            <h1> ADO.NET Database Connection code </h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 text-light">
+                <xmp>
+                    using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+
+namespace Narendra_AKS_machineTest.Models
+{
+    public class DBManeger
+    {
+        SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["mycon"].ConnectionString);
+        public int  ExecuteInsertUpdateDelete(string procname, SqlParameter[] parameters)
+        {
+            SqlCommand cmd = new SqlCommand(procname, connection);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            foreach(SqlParameter param in parameters) { 
+             cmd.Parameters.Add(param);
+            }
+            connection.Open();
+            int x=cmd.ExecuteNonQuery();
+            connection.Close();
+            return x;
+        }
+        public DataTable ExecuteSelect(string proname, SqlParameter[] parameters)
+        {
+            SqlCommand cmd=new SqlCommand(proname, connection);
+            cmd.CommandType=CommandType.StoredProcedure;
+            DataTable dt = new DataTable();
+            foreach(SqlParameter param in parameters)
+            {
+                cmd.Parameters.Add(param);
+            }
+            SqlDataAdapter adapter=new SqlDataAdapter(cmd);
+            adapter.Fill(dt);
+            return dt;
+        }
+    }
+    
+}
+                </xmp>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+            <h1> How to print Data In HTML Page </h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 text-light">
+            <xmp>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="admintable">
+                    <tr>
+                        <th width="59" align="left" valign="middle">Sr.No.</th>
+                        <th width="752" align="left" valign="middle">Category Name</th>
+                        <th width="77" align="left" valign="middle">Status</th>
+                        <th width="54" align="left" valign="middle">Edit</th>
+                        <th width="71" align="left" valign="middle">Remove</th>
+                    </tr>
+                    @{
+                        foreach (var row in ViewBag.category.Rows)
+                        {
+                            <tr>
+                                <td align="left" valign="top">@row[0]</td>
+                                <td align="left" valign="top">@row[1]</td>
+                                <td align="left" valign="top"><strong>@row[2]</strong></td>
+                                <td align="left" valign="top"><a href="/home/editcate?id=@row[0]">Edit</a></td>
+                                <td align="center" valign="top"><a href="/home/deletcate?id=@row[0]">
+                                    <img src="images/icon-bin.jpg" alt="" width="25" height="25" border="0" /> Delete</a></td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </xmp>
+        </div>
+      </div>
+    </div>
+</body>
+</html>
